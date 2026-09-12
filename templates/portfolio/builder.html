@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Builder | PortfolioForge</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body{ font-family:'Poppins',sans-serif; background:#f8fafc; }
+        .navbar{ background:white; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+        .navbar-brand{ font-weight:700; color:#4f46e5 !important; }
+        .hero{ background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; padding:50px 0; }
+        .card-section{ background:white; border:none; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,.08); margin-bottom:30px; }
+        .card-section .card-header{ background:white; border-bottom:1px solid #eee; border-radius:15px 15px 0 0 !important; font-weight:600; padding:20px 25px; }
+        .card-section .card-body{ padding:25px; }
+        .form-label{ font-weight:500; }
+        .form-control, .form-select{ border-radius:10px; padding:10px 14px; }
+        .item-block{ background:#f8fafc; border-radius:12px; padding:18px; margin-bottom:15px; position:relative; }
+        .btn-remove{ position:absolute; top:12px; right:12px; }
+        .btn-add{ border-radius:30px; }
+        .btn-save{ background:#4f46e5; color:white; border-radius:30px; padding:12px 40px; font-weight:600; }
+        .btn-save:hover{ background:#4338ca; color:white; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">PortfolioForge</a>
+    <div class="ms-auto">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-primary me-2">Dashboard</a>
+      <a href="{% url 'preview' %}" class="btn btn-primary">Preview</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <h2>Portfolio Builder</h2>
+    <p class="mb-0">Fill in your details, add projects and skills, then save.</p>
+  </div>
+</section>
+
+<div class="container py-5">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Profile -->
+    <div class="card card-section">
+      <div class="card-header"><i class="bi bi-person-badge me-2"></i>Profile</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            {{ form.full_name }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tagline / Title</label>
+            {{ form.tagline }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Bio</label>
+            {{ form.bio }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Phone</label>
+            {{ form.phone }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Location</label>
+            {{ form.location }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Profile Image</label>
+            {{ form.profile_image }}
+            {% if portfolio.profile_image %}
+              <div class="form-text">Current: {{ portfolio.profile_image.name }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Resume (PDF)</label>
+            {{ form.resume }}
+            {% if portfolio.resume %}
+              <div class="form-text">Current: {{ portfolio.resume.name }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">GitHub URL</label>
+            {{ form.github_url }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">LinkedIn URL</label>
+            {{ form.linkedin_url }}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Twitter URL</label>
+            {{ form.twitter_url }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="card card-section">
+      <div class="card-header"><i class="bi bi-kanban me-2"></i>Projects</div>
+      <div class="card-body">
+        {{ project_formset.management_form }}
+        <div id="project-forms">
+          {% for pform in project_formset %}
+            <div class="item-block project-form">
+              {% if pform.instance.pk %}{{ pform.DELETE }} <label class="small text-danger">Delete this project</label>{% endif %}
+              {{ pform.id }}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Title</label>
+                  {{ pform.title }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Link</label>
+                  {{ pform.link }}
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Description</label>
+                  {{ pform.description }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Image</label>
+                  {{ pform.image }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <p class="text-muted small mb-0">Leave a project's title empty to skip it. Save and reopen the builder to add more.</p>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="card card-section">
+      <div class="card-header"><i class="bi bi-bar-chart-fill me-2"></i>Skills</div>
+      <div class="card-body">
+        {{ skill_formset.management_form }}
+        <div id="skill-forms">
+          {% for sform in skill_formset %}
+            <div class="item-block skill-form">
+              {% if sform.instance.pk %}{{ sform.DELETE }} <label class="small text-danger">Delete this skill</label>{% endif %}
+              {{ sform.id }}
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Skill Name</label>
+                  {{ sform.name }}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Proficiency (%)</label>
+                  {{ sform.proficiency }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <p class="text-muted small mb-0">Leave a skill's name empty to skip it. Save and reopen the builder to add more.</p>
+      </div>
+    </div>
+
+    <div class="text-center mb-5">
+      <button type="submit" class="btn btn-save"><i class="bi bi-save2 me-2"></i>Save Portfolio</button>
+    </div>
+
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
